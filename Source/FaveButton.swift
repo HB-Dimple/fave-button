@@ -44,7 +44,7 @@ open class FaveButton: UIButton {
     
     fileprivate struct Const{
         static let duration             = 1.0
-        static let expandDuration       = 0.1298 
+        static let expandDuration       = 0.1298
         static let collapseDuration     = 0.1089
         static let faveIconShowDelay    = Const.expandDuration + Const.collapseDuration/2.0
         static let dotRadiusFactors     = (first: 0.0633, second: 0.04)
@@ -64,10 +64,30 @@ open class FaveButton: UIButton {
     fileprivate var faveIconImage:UIImage?
     fileprivate var faveIcon: FaveIcon!
     
+    open var allowAnimation : Bool = false
     
-    override open var isSelected: Bool{
+    override  open var isSelected: Bool{
         didSet{
-            animateSelect(self.isSelected, duration: Const.duration)
+            if self.isSelected
+            {
+                if allowAnimation
+                {
+                    allowAnimation  = false
+                    animateSelect(self.isSelected, duration: Const.duration)
+                    
+                    
+                }
+                else
+                {
+                    self.faveIcon =  FaveIcon.createFaveIcon(self, icon: faveIconImage!,color: selectedColor)
+                }
+                
+                
+            }
+            else
+            {
+                self.faveIcon =  FaveIcon.createFaveIcon(self, icon: faveIconImage!,color: normalColor)
+            }
         }
     }
     
@@ -162,8 +182,14 @@ extension FaveButton{
         self.addTarget(self, action: #selector(toggle(_:)), for: .touchUpInside)
     }
     
-    func toggle(_ sender: FaveButton){
+    func toggle(_ sender: FaveButton)
+    {
+        
+        allowAnimation  = true
+        
         sender.isSelected = !sender.isSelected
+        
+        
         
         guard case let delegate as FaveButtonDelegate = self.delegate else{
             return
@@ -194,9 +220,9 @@ extension FaveButton{
             
             ring.animateToRadius(radius, toColor: circleToColor, duration: Const.expandDuration, delay: 0)
             ring.animateColapse(radius, duration: Const.collapseDuration, delay: Const.expandDuration)
-
+            
             sparks.forEach{
-                $0.animateIgniteShow(igniteToRadius, duration:0.4, delay: Const.collapseDuration/3.0)
+                $0.animateIgniteShow(igniteToRadius, duration:0.6, delay: Const.collapseDuration/3.0)
                 $0.animateIgniteHide(0.7, delay: 0.2)
             }
         }
